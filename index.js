@@ -21,13 +21,32 @@ async function run() {
     await client.connect();
     const database = client.db("grocery-store");
     const productsCollection = database.collection("products");
+    const AddToCartCollection = database.collection("cart");
 
+    // product get api
     app.get("/products", async (req, res) => {
       const cursors = productsCollection.find();
-      const result = await cursors.toArray();
-      res.send(result);
+      const data = await cursors.toArray();
+      res.send({ data });
     });
-
+    // product post api
+    app.post("/products", async (req, res) => {
+      const body = req.body;
+      const result = await productsCollection.insertOne(body);
+      res.json(result);
+    });
+    // cart get api
+    app.get("/cart", async (req, res) => {
+      const cursors = AddToCartCollection.find();
+      const data = await cursors.toArray();
+      res.send(data);
+    });
+    // cart post api
+    app.post("/products", async (req, res) => {
+      const body = req.body;
+      const result = await AddToCartCollection.insertOne(body);
+      res.json(result);
+    });
     console.log("database connect");
   } finally {
     //   await client.close();
