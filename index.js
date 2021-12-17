@@ -39,12 +39,37 @@ async function run() {
     app.get("/cart", async (req, res) => {
       const cursors = AddToCartCollection.find();
       const data = await cursors.toArray();
-      res.send(data);
+      res.send({ data });
     });
     // cart post api
-    app.post("/products", async (req, res) => {
+    app.post("/cart", async (req, res) => {
       const body = req.body;
       const result = await AddToCartCollection.insertOne(body);
+      res.json(result);
+    });
+    // cart put api
+    app.put("/cart/:id", async (req, res) => {
+      const quantity = req.body.quantity;
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          quantity: quantity,
+        },
+      };
+      const result = await AddToCartCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.json(result);
+    });
+    // cart delete api
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await AddToCartCollection.deleteOne(query);
       res.json(result);
     });
     console.log("database connect");
