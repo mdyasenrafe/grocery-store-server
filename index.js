@@ -109,18 +109,32 @@ async function run() {
       res.json(result);
     });
     console.log("database connect");
-    // user collection post method
-    app.post("/users", async (req, res) => {
-      const body = req.body;
-      const result = await usersCollection.insertOne(body);
-      res.json(result);
-    });
     // users get method
     app.get("/users", async (req, res) => {
       const cursors = usersCollection.find();
       const result = await cursors.toArray();
       res.send(result);
     });
+    // user collection post method
+    app.post("/users", async (req, res) => {
+      const body = req.body;
+      const result = await usersCollection.insertOne(body);
+      res.json(result);
+    });
+    // users update and google sign in
+    app.put("/users", async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const options = { upsert: true };
+      const updateDoc = { $set: user };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.json(result);
+    });
+
     // find users Admin
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
