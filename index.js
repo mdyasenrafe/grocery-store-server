@@ -22,6 +22,8 @@ async function run() {
     const database = client.db("grocery-store");
     const productsCollection = database.collection("products");
     const AddToCartCollection = database.collection("cart");
+    const OrdersCollection = database.collection("orders");
+    const reviewCollection = database.collection("reviews");
 
     // product get api
     app.get("/products", async (req, res) => {
@@ -67,9 +69,42 @@ async function run() {
     });
     // cart delete api
     app.delete("/cart/:id", async (req, res) => {
+      console.log(req.params.id);
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await AddToCartCollection.deleteOne(query);
+      res.json(result);
+    });
+    // cart delete api
+    app.delete("/carts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await AddToCartCollection.deleteMany(query);
+      res.json(result);
+    });
+
+    // orders get api
+    app.get("/orders", async (req, res) => {
+      const cursors = OrdersCollection.find();
+      const data = await cursors.toArray();
+      res.send({ data });
+    });
+    // orders post api
+    app.post("/orders", async (req, res) => {
+      const body = req.body;
+      const result = await OrdersCollection.insertOne(body);
+      res.json(result);
+    });
+    // reviews get method
+    app.get("/reviews", async (req, res) => {
+      const cursors = reviewCollection.find();
+      const result = await cursors.toArray();
+      res.send(result);
+    });
+    // reviews get method
+    app.post("/reviews", async (req, res) => {
+      const body = req.body;
+      const result = await reviewCollection.insertOne(body);
       res.json(result);
     });
     console.log("database connect");
