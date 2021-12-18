@@ -21,6 +21,7 @@ async function run() {
     await client.connect();
     const database = client.db("grocery-store");
     const productsCollection = database.collection("products");
+    const usersCollection = database.collection("users");
     const AddToCartCollection = database.collection("cart");
     const OrdersCollection = database.collection("orders");
     const reviewCollection = database.collection("reviews");
@@ -108,6 +109,44 @@ async function run() {
       res.json(result);
     });
     console.log("database connect");
+    // user collection post method
+    app.post("/users", async (req, res) => {
+      const body = req.body;
+      const result = await usersCollection.insertOne(body);
+      res.json(result);
+    });
+    // users get method
+    app.get("/users", async (req, res) => {
+      const cursors = usersCollection.find();
+      const result = await cursors.toArray();
+      res.send(result);
+    });
+    // find users Admin
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      let isAdmin = false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      } else {
+        isAdmin = false;
+      }
+      res.send({ admin: isAdmin });
+    });
+    // get admin
+    app.put("/users/admin", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          role: user.role,
+        },
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
+      res.json(result);
+    });
   } finally {
     //   await client.close();
   }
