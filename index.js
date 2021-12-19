@@ -33,9 +33,10 @@ async function run() {
       res.send({ data });
     });
     // product post api
-    app.post("/products", async (req, res) => {
-      const body = req.body;
-      const result = await productsCollection.insertOne(body);
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
       res.json(result);
     });
     // cart get api
@@ -94,6 +95,24 @@ async function run() {
     app.post("/orders", async (req, res) => {
       const body = req.body;
       const result = await OrdersCollection.insertOne(body);
+      res.json(result);
+    });
+    // my orders update
+    app.put("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const newData = req.body;
+      const updateDoc = {
+        $set: {
+          status: newData.status,
+        },
+      };
+      const result = await OrdersCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
       res.json(result);
     });
     // reviews get method
